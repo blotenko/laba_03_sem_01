@@ -1,89 +1,59 @@
-
-//
-// Disclaimer:
-// ----------
-//
-// This code will work only if you selected window, graphics and audio.
-//
-// In order to load the resources like cute_image.png, you have to set up
-// your target scheme:
-//
-// - Select "Edit Scheme…" in the "Product" menu;
-// - Check the box "use custom working directory";
-// - Fill the text field with the folder path containing your resources;
-//        (e.g. your project folder)
-// - Click OK.
-//
-
-#include <SFML/Audio.hpp>
+// main.cpp
 #include <SFML/Graphics.hpp>
+#include "Game.hpp"
 
-int main(int argc, char const** argv)
+int main()
 {
-    // Create the main window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
+    
+    sf::RenderWindow window(sf::VideoMode(600, 600), "15");
+    window.setFramerateLimit(60);
 
-    // Set the Icon
-    //sf::Image icon;
-//    if (!icon.loadFromFile("icon.png")) {
-//        return EXIT_FAILURE;
-//    }
-//    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
-    // Load a sprite to display
-    sf::Texture texture;
-    if (!texture.loadFromFile("cute_image.jpg")) {
-        return EXIT_FAILURE;
-    }
-    sf::Sprite sprite(texture);
-
-    // Create a graphical text to display
     sf::Font font;
-    if (!font.loadFromFile("sansation.ttf")) {
-        return EXIT_FAILURE;
-    }
-    sf::Text text("Hello SFML", font, 50);
-    text.setFillColor(sf::Color::Black);
+    font.loadFromFile("calibri.ttf");
 
-    // Load a music to play
-    sf::Music music;
-    if (!music.openFromFile("nice_music.ogg")) {
-        return EXIT_FAILURE;
-    }
+    
+    sf::Text text("F2 - New Game / Esc - Exit / Arrow Keys - Move Tile", font, 20);
+    text.setFillColor(sf::Color::Cyan);
+    text.setPosition(5.f, 5.f);
 
-    // Play the music
-    music.play();
+    
+    Game game;
+    game.setPosition(50.f, 50.f);
 
-    // Start the game loop
+    sf::Event event;
+    int move_counter = 0;
+
     while (window.isOpen())
     {
-        // Process events
-        sf::Event event;
         while (window.pollEvent(event))
         {
-            // Close window: exit
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-
-            // Escape pressed: exit
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                window.close();
+            if (event.type == sf::Event::Closed) window.close();
+            if (event.type == sf::Event::KeyPressed)
+            {
+               
+                if (event.key.code == sf::Keyboard::Escape) window.close();
+                if (event.key.code == sf::Keyboard::Left) game.Move(Direction::Left);
+                if (event.key.code == sf::Keyboard::Right) game.Move(Direction::Right);
+                if (event.key.code == sf::Keyboard::Up) game.Move(Direction::Up);
+                if (event.key.code == sf::Keyboard::Down) game.Move(Direction::Down);
+                
+                if (event.key.code == sf::Keyboard::F2)
+                {
+                    game.Init();
+                    move_counter = 100;
+                }
             }
         }
 
-        // Clear screen
+        
+        if (move_counter-- > 0) game.Move((Direction)(rand() % 4));
+
+        
         window.clear();
-
-        // Draw the sprite
-        window.draw(sprite);
-
-        // Draw the string
+        window.draw(game);
         window.draw(text);
-
-        // Update the window
         window.display();
     }
 
-    return EXIT_SUCCESS;
+    return 0;
 }
